@@ -1,6 +1,12 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import joblib
+
+
+# --------------------------------------------------
+# GENRES
+# --------------------------------------------------
 
 GENRES = [
     "unknown",
@@ -24,6 +30,7 @@ GENRES = [
     "Western"
 ]
 
+
 # --------------------------------------------------
 # CREATE FASTAPI APPLICATION
 # --------------------------------------------------
@@ -32,6 +39,19 @@ app = FastAPI(
     title="Movie Recommendation API",
     description="Movie Recommendation System using SVD and Content-Based Filtering",
     version="1.0.0"
+)
+
+
+# --------------------------------------------------
+# CORS
+# --------------------------------------------------
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -101,7 +121,6 @@ def recommend(user_id: int, n: int = 10):
 
     # Check whether user exists
     if user_id not in ratings["user_id"].values:
-
         raise HTTPException(
             status_code=404,
             detail="User not found"
@@ -165,7 +184,6 @@ def similar_movies(movie_id: int, n: int = 10):
 
     # Check whether movie exists
     if movie_id not in movie_id_to_index:
-
         raise HTTPException(
             status_code=404,
             detail="Movie not found"
@@ -174,7 +192,7 @@ def similar_movies(movie_id: int, n: int = 10):
     # Get index of selected movie
     index = movie_id_to_index[movie_id]
 
-    # Calculate cosine-like similarity
+    # Calculate similarity
     similarity_scores = (
         genre_matrix @ genre_matrix[index].T
     ).toarray().flatten()
@@ -210,8 +228,17 @@ def similar_movies(movie_id: int, n: int = 10):
         "movie_id": movie_id,
         "similar_movies": results
     }
+
+
+# --------------------------------------------------
+# MOVIE CATALOG
+# --------------------------------------------------
+
 @app.get("/movies")
-def get_movies(n: int = 1682, genre: str = "All"):
+def get_movies(
+    n: int = 1682,
+    genre: str = "All"
+):
 
     movie_list = movies.head(n)
 
@@ -223,12 +250,18 @@ def get_movies(n: int = 1682, genre: str = "All"):
 
         if idx < genre_matrix.shape[0]:
 
-            genre_values = genre_matrix[idx].toarray().flatten()
+            genre_values = (
+                genre_matrix[idx]
+                .toarray()
+                .flatten()
+            )
 
             for i, value in enumerate(genre_values):
 
                 if value > 0 and i < len(GENRES):
-                    movie_genres.append(GENRES[i])
+                    movie_genres.append(
+                        GENRES[i]
+                    )
 
         if genre != "All" and genre not in movie_genres:
             continue
@@ -242,8 +275,17 @@ def get_movies(n: int = 1682, genre: str = "All"):
     return {
         "movies": results
     }
+
+
+# --------------------------------------------------
+# HYBRID RECOMMENDATIONS
+# --------------------------------------------------
+
 @app.get("/hybrid/{user_id}")
-def hybrid_recommend(user_id: int, n: int = 10):
+def hybrid_recommend(
+    user_id: int,
+    n: int = 10
+):
 
     if user_id not in ratings["user_id"].values:
         raise HTTPException(
@@ -277,7 +319,9 @@ def hybrid_recommend(user_id: int, n: int = 10):
             "title": movies[
                 movies["movie_id"] == movie_id
             ]["title"].iloc[0],
-            "svd_score": float(prediction.est)
+            "svd_score": float(
+                prediction.est
+            )
         })
 
     if not results:
@@ -287,20 +331,30 @@ def hybrid_recommend(user_id: int, n: int = 10):
         }
 
     # Normalize SVD scores
-    max_score = max(x["svd_score"] for x in results)
-    min_score = min(x["svd_score"] for x in results)
+    max_score = max(
+        x["svd_score"]
+        for x in results
+    )
+
+    min_score = min(
+        x["svd_score"]
+        for x in results
+    )
 
     for item in results:
 
         if max_score == min_score:
+
             item["svd_normalized"] = 1.0
+
         else:
+
             item["svd_normalized"] = (
                 (item["svd_score"] - min_score)
                 / (max_score - min_score)
             )
 
-        # Content score placeholder based on movie popularity
+        # Content score based on genre matrix
         movie_id = item["movie_id"]
 
         if movie_id in movie_id_to_index:
@@ -314,21 +368,27 @@ def hybrid_recommend(user_id: int, n: int = 10):
             item["content_score"] = content_score
 
         else:
+
             item["content_score"] = 0.0
 
     max_content = max(
-        x["content_score"] for x in results
+        x["content_score"]
+        for x in results
     )
 
     min_content = min(
-        x["content_score"] for x in results
+        x["content_score"]
+        for x in results
     )
 
     for item in results:
 
         if max_content == min_content:
+
             content_normalized = 1.0
+
         else:
+
             content_normalized = (
                 (item["content_score"] - min_content)
                 / (max_content - min_content)
