@@ -23,4 +23,5 @@ Thumbs.db
 outputs/
 
 # Trained model files
-# models/*.pkl
+models/collaborative.pkl
+models/preprocessing.pkl
