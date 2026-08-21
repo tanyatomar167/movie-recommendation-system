@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getHybridRecommendations } from "../api";
 
 function Recommend({ userId }) {
   const [recommendations, setRecommendations] = useState([]);
@@ -11,19 +12,11 @@ function Recommend({ userId }) {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `/api/hybrid/${userId}?n=10`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to load recommendations");
-        }
-
-        const data = await response.json();
+        const data = await getHybridRecommendations(userId, 10);
 
         setRecommendations(data.recommendations || []);
       } catch (err) {
-        console.error(err);
+        console.error("Recommendation error:", err);
         setError("Unable to load recommendations.");
       } finally {
         setLoading(false);
@@ -59,7 +52,13 @@ function Recommend({ userId }) {
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && recommendations.length === 0 && (
+        <div className="empty-state">
+          No recommendations found.
+        </div>
+      )}
+
+      {!loading && !error && recommendations.length > 0 && (
         <div className="recommendation-grid">
           {recommendations.map((movie, index) => (
             <div
