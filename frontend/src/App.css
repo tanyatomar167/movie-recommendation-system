@@ -19,10 +19,18 @@ button {
   cursor: pointer;
 }
 
+/* =========================
+   APP
+========================= */
+
 .app {
   min-height: 100vh;
   display: flex;
 }
+
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar {
   width: 250px;
@@ -106,6 +114,10 @@ button {
   color: #9ca3af;
 }
 
+/* =========================
+   MAIN
+========================= */
+
 .main-content {
   margin-left: 250px;
   width: calc(100% - 250px);
@@ -133,6 +145,10 @@ button {
   color: #6b7280;
   margin-top: 10px;
 }
+
+/* =========================
+   DASHBOARD
+========================= */
 
 .stats-grid {
   display: grid;
@@ -235,39 +251,288 @@ button {
   opacity: 0.9;
 }
 
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+/* =========================
+   MOVIE RECOMMENDATIONS
+   Works with current JSX
+========================= */
+
+.page {
+  width: 100%;
 }
 
-.movie-card {
-  .movie-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 18px;
+.page > h1 {
+  margin: 0 0 30px;
+  font-size: 34px;
+  color: #111827;
+}
+
+/* Controls */
+
+.controls {
   display: flex;
-  gap: 16px;
+  align-items: end;
+  gap: 18px;
+  flex-wrap: wrap;
+
+  background: white;
+  padding: 22px;
+
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+
+  margin-bottom: 30px;
+}
+
+.controls > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.controls label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.controls input[type="number"] {
+  width: 130px;
+  height: 44px;
+  background: white;
+}
+
+.controls input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+}
+
+.controls select {
+  height: 44px;
+  min-width: 150px;
+}
+
+.controls > div:nth-child(3) {
+  flex-direction: row;
+  align-items: center;
+  height: 44px;
+}
+
+.controls > div:nth-child(3) label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* Recommend Button */
+
+.controls button {
+  height: 44px;
+  padding: 0 22px;
+
+  background: #4f46e5;
+  color: white;
+
+  border-radius: 9px;
+
+  font-weight: 600;
+
   transition: 0.2s ease;
+}
+
+.controls button:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.controls button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
+   RESULT SECTION
+========================= */
+
+.recommendation-list {
+  margin-top: 10px;
+}
+
+.recommendation-list::before {
+  content: "Recommended Movies";
+  display: block;
+
+  font-size: 25px;
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 20px;
+}
+
+/* =========================
+   MOVIE CARDS
+========================= */
+
+.movie-card {
+  position: relative;
+
+  background: white;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 16px;
+
+  margin-bottom: 18px;
+
+  padding: 0;
+
+  display: flex;
+
+  overflow: hidden;
+
+  min-height: 190px;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+
+  transition: 0.25s ease;
 }
 
 .movie-card:hover {
   transform: translateY(-4px);
+
   border-color: #6366f1;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10);
 }
 
-.movie-poster {
-  width: 70px;
-  height: 90px;
-  min-width: 70px;
-  border-radius: 10px;
-  background: #eef2ff;
+/* =========================
+   MOVIE POSTER
+========================= */
+
+.movie-card::before {
+  content: "🎬";
+
+  width: 135px;
+  min-width: 135px;
+  height: 190px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+
+  font-size: 55px;
+
+  background: linear-gradient(
+    135deg,
+    #111827,
+    #312e81
+  );
+
+  color: white;
+}
+
+/* Movie content */
+
+.movie-card h3 {
+  margin: 0 0 14px;
+
+  font-size: 18px;
+
+  line-height: 1.4;
+
+  color: #111827;
+}
+
+.movie-card > div:not(.genres) {
+  padding: 22px;
+}
+
+/* Ranking */
+
+.movie-card strong:first-child {
+  color: #4f46e5;
+}
+
+/* =========================
+   GENRES
+========================= */
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin: 8px 0 15px;
+}
+
+.genre {
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  background: #eef2ff;
+
+  color: #4f46e5;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+/* =========================
+   RATINGS
+========================= */
+
+.movie-card p {
+  margin: 9px 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+.movie-card p strong {
+  color: #111827;
+
+  font-size: 16px;
+}
+
+/* =========================
+   EMPTY / ERROR
+========================= */
+
+.page > p {
+  color: #6b7280;
+}
+
+.error {
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  border: 1px solid #fecaca;
+
+  padding: 14px 18px;
+
+  border-radius: 9px;
+
+  margin-bottom: 20px;
+}
+
+/* =========================
+   OTHER MOVIE GRID
+========================= */
+
+.movie-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px;
 }
 
 .movie-info {
@@ -280,12 +545,6 @@ button {
   color: #9ca3af;
   font-weight: 600;
   margin-bottom: 6px;
-}
-
-.movie-card h3 {
-  margin: 0 0 14px;
-  font-size: 16px;
-  line-height: 1.4;
 }
 
 .movie-rating {
@@ -307,15 +566,9 @@ button {
 .movie-rating span:last-child {
   color: #9ca3af;
 }
-}
 
 .movie-card-icon {
   font-size: 35px;
-}
-
-.movie-card h3 {
-  margin: 0 0 10px;
-  font-size: 17px;
 }
 
 .movie-score {
@@ -323,10 +576,9 @@ button {
   color: #4b5563;
 }
 
-.movie-id {
-  font-size: 12px;
-  color: #9ca3af;
-}
+/* =========================
+   SEARCH / FILTER
+========================= */
 
 .search-panel,
 .filter-panel {
@@ -370,7 +622,56 @@ button {
   margin-bottom: 20px;
 }
 
+/* =========================
+   GENRE LIST
+========================= */
+
+.genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.genre-list .genre {
+  padding: 8px 14px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 999px;
+
+  background: white;
+
+  color: #4b5563;
+
+  cursor: pointer;
+
+  font-size: 13px;
+}
+
+.genre-list .genre:hover {
+  border-color: #6366f1;
+  color: #4f46e5;
+}
+
+.genre-list .genre.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+}
+
+.catalog-count {
+  margin: 10px 0 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
 @media (max-width: 900px) {
+
   .sidebar {
     width: 210px;
   }
@@ -390,329 +691,43 @@ button {
     flex-direction: column;
   }
 }
-.top-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 30px;
-  padding: 28px 30px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #111827, #312e81);
-  color: white;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-}
 
-.eyebrow {
-  margin: 0 0 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  opacity: 0.7;
-}
+@media (max-width: 700px) {
 
-.top-header h1 {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 750;
-}
+  .main-content {
+    padding: 20px;
+  }
 
-.header-subtitle {
-  margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 14px;
-}
-
-.header-badge {
-  padding: 10px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.dashboard {
-  max-width: 1200px;
-}
-
-.welcome-section {
-  padding: 10px 4px 25px;
-}
-
-.section-label {
-  margin: 0 0 8px;
-  color: #6366f1;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.8px;
-}
-
-.welcome-section h2 {
-  margin: 0;
-  font-size: 32px;
-  color: #111827;
-}
-
-.welcome-section p:not(.section-label) {
-  max-width: 650px;
-  margin-top: 10px;
-  color: #6b7280;
-  line-height: 1.6;
-}
-
-.quick-recommend {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 30px;
-  padding: 28px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-}
-
-.quick-recommend h3 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.quick-recommend p:not(.section-label) {
-  margin-bottom: 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.recommend-form {
-  min-width: 320px;
-}
-
-.recommend-form label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.input-row {
-  display: flex;
-  gap: 8px;
-}
-
-.input-row input {
-  width: 100px;
-  padding: 11px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  outline: none;
-  font-size: 14px;
-}
-
-.input-row input:focus {
-  border-color: #6366f1;
-}
-
-.input-row button {
-  padding: 11px 18px;
-  border: none;
-  border-radius: 10px;
-  background: #4f46e5;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.input-row button:hover {
-  background: #4338ca;
-}
-
-.recommend-form small {
-  display: block;
-  margin-top: 7px;
-  color: #9ca3af;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.info-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-}
-
-.info-card > span {
-  font-size: 25px;
-}
-
-.info-card strong {
-  font-size: 14px;
-}
-
-.info-card p {
-  margin: 5px 0 0;
-  color: #9ca3af;
-  font-size: 12px;
-}
-
-@media (max-width: 800px) {
-  .quick-recommend {
+  .controls {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .recommend-form {
-    min-width: 0;
+  .controls > div {
+    width: 100%;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  .controls input[type="number"],
+  .controls select {
+    width: 100%;
   }
-}
-.genre-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
 
-.genre {
-  padding: 8px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  background: white;
-  color: #4b5563;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.genre:hover {
-  border-color: #6366f1;
-  color: #4f46e5;
-}
-
-.genre.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
-  color: white;
-}
-
-.movie-genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.movie-genres span {
-  padding: 3px 7px;
-  border-radius: 5px;
-  background: #eef2ff;
-  color: #4f46e5;
-  font-size: 10px;
-}
-
-.catalog-count {
-  margin: 10px 0 18px;
-  color: #6b7280;
-  font-size: 13px;
-}
-.recommendation-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.recommendation-card {
-  position: relative;
-  padding: 14px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  transition: 0.2s ease;
-}
-
-.recommendation-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-}
-
-.recommendation-number {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 7px;
-  border-radius: 6px;
-  background: #111827;
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.movie-poster {
-  height: 180px;
-  margin-bottom: 14px;
-  border-radius: 12px;
-  background: #eef2ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 45px;
-}
-
-.recommendation-card h3 {
-  margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.recommendation-card p {
-  margin: 0 0 8px;
-  color: #6b7280;
-  font-size: 12px;
-}
-
-.hybrid-score {
-  color: #4f46e5;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.loading-message,
-.error-message {
-  padding: 30px;
-  border-radius: 14px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  text-align: center;
-}
-
-.error-message {
-  color: #dc2626;
-}
-
-@media (max-width: 1100px) {
-  .recommendation-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .controls button {
+    width: 100%;
   }
-}
 
-@media (max-width: 700px) {
-  .recommendation-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .movie-card {
+    min-height: auto;
   }
-}
 
-@media (max-width: 450px) {
-  .recommendation-grid {
-    grid-template-columns: 1fr;
+  .movie-card::before {
+    width: 95px;
+    min-width: 95px;
+    height: 150px;
+    font-size: 40px;
+  }
+
+  .movie-card > div:not(.genres) {
+    padding: 16px;
   }
 }
