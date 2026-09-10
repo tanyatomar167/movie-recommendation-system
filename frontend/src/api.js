@@ -1,5 +1,3 @@
-// api.js
-
 const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
 
 async function request(path) {
@@ -16,50 +14,20 @@ async function request(path) {
   return response.json();
 }
 
-
-// ================================
-// Original API functions
-// ================================
-
-export const getStats = () => {
-  return request("/stats");
-};
-
-
-export const getRecommendations = (userId, n = 10) => {
-  return request(`/recommend/${userId}?n=${n}`);
-};
-
-
-export const getHybridRecommendations = (userId, n = 10) => {
-  return request(`/hybrid/${userId}?n=${n}`);
-};
-
-
-export const getSimilarMovies = (movieId, n = 10) => {
-  return request(`/similar/${movieId}?n=${n}`);
-};
-
-
-export const getMovies = (genre = "All", n = 20) => {
-  return request(
-    `/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`
-  );
-};
-
-
-// ================================
-// api object
-// ================================
-
 export const api = {
-  stats: getStats,
+  stats: () => request("/stats"),
 
-  recommend: getRecommendations,
+  recommend: (userId, n = 10) =>
+    request(`/recommend/${userId}?n=${n}`),
 
-  hybrid: getHybridRecommendations,
+  hybrid: (userId, n = 10) =>
+    request(`/hybrid/${userId}?n=${n}`),
 
-  similar: getSimilarMovies,
+  similar: (movieId, n = 10) =>
+    request(`/similar/${movieId}?n=${n}`),
 
-  movies: getMovies,
+  movies: (genre = "All", n = 20) =>
+    request(
+      `/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`
+    ),
 };
