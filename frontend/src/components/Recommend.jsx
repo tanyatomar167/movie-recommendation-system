@@ -1,48 +1,53 @@
-import React, { useState } from "react";
-import { api } from "../api";
+import { useState } from "react";
+
+const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
 
 function Recommend({ userId = 1 }) {
   const [uid, setUid] = useState(userId);
   const [n, setN] = useState(10);
-  const [useHybrid, setUseHybrid] = useState(true);
+  const [useHybrid, setUseHybrid] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const load = async () => {
+  const loadRecommendations = async () => {
     if (uid < 1 || uid > 943) {
       setError("User ID must be between 1 and 943.");
       return;
     }
 
+    if (n < 1 || n > 50) {
+      setError("Number of movies must be between 1 and 50.");
+      return;
+    }
+
     setLoading(true);
     setError("");
+    setRecommendations([]);
 
     try {
-      let data;
+      const endpoint = useHybrid
+        ? `/hybrid/${uid}?n=${n}`
+        : `/recommend/${uid}?n=${n}`;
 
-      if (useHybrid) {
-        data = await api.hybrid(uid, n);
-      } else {
-        data = await api.recommend(uid, n);
+      const response = await fetch(API_URL + endpoint);
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
       }
 
-      setRecommendations(data.recommendations || []);
+      const data = await response.json();
+
+      console.log("Recommendation API response:", data);
+
+      if (!data.recommendations) {
+        throw new Error("No recommendations received from API.");
+      }
+
+      setRecommendations(data.recommendations);
     } catch (err) {
       console.error("Recommendation error:", err);
-
-      // Fallback to normal SVD recommendations
-      if (useHybrid) {
-        try {
-          const data = await api.recommend(uid, n);
-          setRecommendations(data.recommendations || []);
-          setError("Hybrid recommendation failed. Showing normal recommendations.");
-        } catch (fallbackError) {
-          setError(fallbackError.message);
-        }
-      } else {
-        setError(err.message);
-      }
+      setError(err.message || "Failed to load recommendations.");
     } finally {
       setLoading(false);
     }
@@ -53,6 +58,7 @@ function Recommend({ userId = 1 }) {
       <h1>Movie Recommendations</h1>
 
       <div className="controls">
+
         <div>
           <label>User ID</label>
           <input
@@ -86,10 +92,21 @@ function Recommend({ userId = 1 }) {
           </label>
         </div>
 
-        <button onClick={load} disabled={loading}>
+        <button
+          type="button"
+          onClick={loadRecommendations}
+          disabled={loading}
+        >
           {loading ? "Loading..." : "Get Recommendations"}
         </button>
+
       </div>
+
+      {loading && (
+        <p>
+          Loading recommendations...
+        </p>
+      )}
 
       {error && (
         <p className="error">
@@ -97,51 +114,70 @@ function Recommend({ userId = 1 }) {
         </p>
       )}
 
-      <div className="recommendation-list">
-        {recommendations.map((movie) => {
-          const genres = Array.isArray(movie.genres)
-            ? movie.genres
-            : typeof movie.genres === "string"
-              ? movie.genres.split("|")
-              : [];
+      {!loading && recommendations.length > 0 && (
+        <div className="recommendation-list">
 
-          return (
-            <div className="movie-card" key={movie.movie_id}>
-              <h3>{movie.title}</h3>
+          {recommendations.map((movie) => {
 
-              <div className="genres">
-                {genres.map((genre) => (
-                  <span key={genre} className="genre">
-                    {genre}
-                  </span>
-                ))}
+            const genres = Array.isArray(movie.genres)
+              ? movie.genres
+              : typeof movie.genres === "string"
+                ? movie.genres.split("|")
+                : [];
+
+            return (
+              <div
+                className="movie-card"
+                key={movie.movie_id}
+              >
+
+                <h3>{movie.title}</h3>
+
+                {genres.length > 0 && (
+                  <div className="genres">
+                    {genres.map((genre) => (
+                      <span
+                        className="genre"
+                        key={genre}
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {movie.predicted_rating !== undefined && (
+                  <p>
+                    Predicted Rating:{" "}
+                    <strong>
+                      {Number(movie.predicted_rating).toFixed(2)}
+                    </strong>
+                  </p>
+                )}
+
+                {movie.hybrid_score !== undefined && (
+                  <p>
+                    Hybrid Score:{" "}
+                    <strong>
+                      {Number(movie.hybrid_score).toFixed(3)}
+                    </strong>
+                  </p>
+                )}
+
               </div>
+            );
+          })}
 
-              {movie.predicted_rating !== undefined && (
-                <p>
-                  Predicted Rating:{" "}
-                  <strong>
-                    {Number(movie.predicted_rating).toFixed(2)}
-                  </strong>
-                </p>
-              )}
-
-              {movie.hybrid_score !== undefined && (
-                <p>
-                  Hybrid Score:{" "}
-                  <strong>
-                    {Number(movie.hybrid_score).toFixed(3)}
-                  </strong>
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {!loading && recommendations.length === 0 && !error && (
-        <p>No recommendations yet. Enter a User ID and click the button.</p>
+        </div>
       )}
+
+      {!loading &&
+        !error &&
+        recommendations.length === 0 && (
+          <p>
+            Enter a User ID and click Get Recommendations.
+          </p>
+        )}
     </div>
   );
 }
