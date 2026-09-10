@@ -1,30 +1,29 @@
 import { useState } from "react";
-import { getSimilarMovies } from "../api";
+import { api } from "../api";
 import MovieCard from "./MovieCard";
 
 function Similar() {
-  const [movieId, setMovieId] = useState("1");
+  const [movieId, setMovieId] = useState(1);
+  const [count, setCount] = useState(10);
   const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const findSimilarMovies = async () => {
-    const id = Number(movieId);
-
-    if (!id || id < 1) {
-      setError("Please enter a valid Movie ID.");
+  const loadSimilarMovies = async () => {
+    if (movieId < 1 || movieId > 1682) {
+      setError("Movie ID must be between 1 and 1682.");
       return;
     }
 
+    setLoading(true);
+    setError("");
+
     try {
-      setLoading(true);
-      setError("");
-
-      const data = await getSimilarMovies(id, 10);
-
+      const data = await api.similar(movieId, count);
       setMovies(data.similar_movies || []);
     } catch (err) {
-      setError("Unable to load similar movies.");
+      console.error(err);
+      setError(err.message);
       setMovies([]);
     } finally {
       setLoading(false);
@@ -32,77 +31,50 @@ function Similar() {
   };
 
   return (
-    <div className="similar-page">
-      <div className="page-header">
+    <div className="page">
+      <h1>Similar Movies</h1>
+
+      <div className="controls">
         <div>
-          <p className="eyebrow">CONTENT-BASED DISCOVERY</p>
-
-          <h1>Similar Movies</h1>
-
-          <p className="page-description">
-            Find movies similar to a movie from the catalog.
-          </p>
-        </div>
-      </div>
-
-      <div className="search-panel">
-        <label htmlFor="movieId">Movie ID</label>
-
-        <div className="input-row">
+          <label>Movie ID</label>
           <input
-            id="movieId"
             type="number"
             min="1"
+            max="1682"
             value={movieId}
-            onChange={(e) => setMovieId(e.target.value)}
-            placeholder="Enter Movie ID"
+            onChange={(e) => setMovieId(Number(e.target.value))}
           />
-
-          <button
-            className="primary-button"
-            onClick={findSimilarMovies}
-          >
-            {loading ? "Searching..." : "Find Similar Movies"}
-          </button>
         </div>
+
+        <div>
+          <label>Number of Movies</label>
+          <input
+            type="number"
+            min="1"
+            max="50"
+            value={count}
+            onChange={(e) => setCount(Number(e.target.value))}
+          />
+        </div>
+
+        <button onClick={loadSimilarMovies} disabled={loading}>
+          {loading ? "Loading..." : "Find Similar Movies"}
+        </button>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <p className="error">{error}</p>}
+
+      <div className="movie-grid">
+        {movies.map((movie) => (
+          <MovieCard
+            key={movie.movie_id}
+            movie={movie}
+          />
+        ))}
+      </div>
 
       {!loading && movies.length === 0 && !error && (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-
-          <h2>Find similar movies</h2>
-
-          <p>
-            Enter a Movie ID and we'll find movies with similar
-            content.
-          </p>
-        </div>
-      )}
-
-      {movies.length > 0 && (
-        <>
-          <div className="section-heading">
-            <h2>Similar Movies</h2>
-            <span>{movies.length} results</span>
-          </div>
-
-          <div className="movie-grid">
-            {movies.map((movie) => (
-              <MovieCard
-                key={movie.movie_id}
-                movie={movie}
-                type="similar"
-              />
-            ))}
-          </div>
-        </>
+        <p>Enter a Movie ID and find similar movies.</p>
       )}
     </div>
   );
