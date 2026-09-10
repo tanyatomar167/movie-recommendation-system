@@ -1,59 +1,33 @@
-const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
+// api.js
 
-export async function getStats() {
-  const response = await fetch(`${API_URL}/stats`);
+const BASE = "https://movie-recommendation-system-4p8t.onrender.com";
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch stats");
+async function request(path) {
+  const res = await fetch(BASE + path);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({
+      detail: res.statusText,
+    }));
+
+    throw new Error(err.detail || `HTTP ${res.status}`);
   }
 
-  return response.json();
+  return res.json();
 }
 
-export async function getRecommendations(userId, n = 10) {
-  const response = await fetch(
-    `${API_URL}/recommend/${userId}?n=${n}`
-  );
+export const api = {
+  stats: () => request("/stats"),
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch recommendations");
-  }
+  recommend: (userId, n = 10) =>
+    request(`/recommend/${userId}?n=${n}`),
 
-  return response.json();
-}
+  hybrid: (userId, n = 10) =>
+    request(`/hybrid/${userId}?n=${n}`),
 
-export async function getSimilarMovies(movieId, n = 10) {
-  const response = await fetch(
-    `${API_URL}/similar/${movieId}?n=${n}`
-  );
+  similar: (movieId, n = 10) =>
+    request(`/similar/${movieId}?n=${n}`),
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch similar movies");
-  }
-
-  return response.json();
-}
-
-export async function getMovies(n = 1682, genre = "All") {
-  const response = await fetch(
-    `${API_URL}/movies?n=${n}&genre=${encodeURIComponent(genre)}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch movies");
-  }
-
-  return response.json();
-}
-
-export async function getHybridRecommendations(userId, n = 10) {
-  const response = await fetch(
-    `${API_URL}/hybrid/${userId}?n=${n}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch hybrid recommendations");
-  }
-
-  return response.json();
-}
+  movies: (genre = "All", n = 20) =>
+    request(`/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`),
+};
