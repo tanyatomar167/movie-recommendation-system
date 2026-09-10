@@ -1,33 +1,65 @@
-const BASE = "https://movie-recommendation-system-4p8t.onrender.com";
+// api.js
+
+const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
 
 async function request(path) {
-  const res = await fetch(BASE + path);
+  const response = await fetch(API_URL + path);
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({
-      detail: res.statusText,
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({
+      detail: response.statusText,
     }));
 
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(error.detail || `HTTP ${response.status}`);
   }
 
-  return res.json();
+  return response.json();
 }
 
+
+// ================================
+// Original API functions
+// ================================
+
+export const getStats = () => {
+  return request("/stats");
+};
+
+
+export const getRecommendations = (userId, n = 10) => {
+  return request(`/recommend/${userId}?n=${n}`);
+};
+
+
+export const getHybridRecommendations = (userId, n = 10) => {
+  return request(`/hybrid/${userId}?n=${n}`);
+};
+
+
+export const getSimilarMovies = (movieId, n = 10) => {
+  return request(`/similar/${movieId}?n=${n}`);
+};
+
+
+export const getMovies = (genre = "All", n = 20) => {
+  return request(
+    `/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`
+  );
+};
+
+
+// ================================
+// api object
+// ================================
+
 export const api = {
-  stats: () => request("/stats"),
+  stats: getStats,
 
-  recommend: (userId, n = 10) =>
-    request(`/recommend/${userId}?n=${n}`),
+  recommend: getRecommendations,
 
-  hybrid: (userId, n = 10) =>
-    request(`/hybrid/${userId}?n=${n}`),
+  hybrid: getHybridRecommendations,
 
-  similar: (movieId, n = 10) =>
-    request(`/similar/${movieId}?n=${n}`),
+  similar: getSimilarMovies,
 
-  movies: (genre = "All", n = 20) =>
-    request(
-      `/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`
-    ),
+  movies: getMovies,
 };
