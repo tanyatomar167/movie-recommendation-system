@@ -3,20 +3,24 @@ import { useState } from "react";
 const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
 
 function Recommend({ userId = 1 }) {
-  const [uid, setUid] = useState(userId);
+  const [uid, setUid] = useState(Number(userId));
   const [n, setN] = useState(10);
   const [useHybrid, setUseHybrid] = useState(false);
+
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const loadRecommendations = async () => {
-    if (uid < 1 || uid > 943) {
+    const user = Number(uid);
+    const count = Number(n);
+
+    if (!Number.isInteger(user) || user < 1 || user > 943) {
       setError("User ID must be between 1 and 943.");
       return;
     }
 
-    if (n < 1 || n > 50) {
+    if (!Number.isInteger(count) || count < 1 || count > 50) {
       setError("Number of movies must be between 1 and 50.");
       return;
     }
@@ -27,10 +31,14 @@ function Recommend({ userId = 1 }) {
 
     try {
       const endpoint = useHybrid
-        ? `/hybrid/${uid}?n=${n}`
-        : `/recommend/${uid}?n=${n}`;
+        ? `/hybrid/${user}?n=${count}`
+        : `/recommend/${user}?n=${count}`;
+
+      console.log("Calling:", API_URL + endpoint);
 
       const response = await fetch(API_URL + endpoint);
+
+      console.log("Status:", response.status);
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
@@ -38,15 +46,16 @@ function Recommend({ userId = 1 }) {
 
       const data = await response.json();
 
-      console.log("Recommendation API response:", data);
+      console.log("API Response:", data);
 
       if (!data.recommendations) {
-        throw new Error("No recommendations received from API.");
+        throw new Error("No recommendations received.");
       }
 
       setRecommendations(data.recommendations);
+
     } catch (err) {
-      console.error("Recommendation error:", err);
+      console.error(err);
       setError(err.message || "Failed to load recommendations.");
     } finally {
       setLoading(false);
@@ -55,12 +64,14 @@ function Recommend({ userId = 1 }) {
 
   return (
     <div className="page">
+
       <h1>Movie Recommendations</h1>
 
       <div className="controls">
 
         <div>
           <label>User ID</label>
+
           <input
             type="number"
             min="1"
@@ -72,6 +83,7 @@ function Recommend({ userId = 1 }) {
 
         <div>
           <label>Number of Movies</label>
+
           <input
             type="number"
             min="1"
@@ -88,6 +100,7 @@ function Recommend({ userId = 1 }) {
               checked={useHybrid}
               onChange={(e) => setUseHybrid(e.target.checked)}
             />
+
             Use Hybrid Recommendation
           </label>
         </div>
@@ -103,9 +116,7 @@ function Recommend({ userId = 1 }) {
       </div>
 
       {loading && (
-        <p>
-          Loading recommendations...
-        </p>
+        <p>Loading recommendations...</p>
       )}
 
       {error && (
@@ -114,59 +125,52 @@ function Recommend({ userId = 1 }) {
         </p>
       )}
 
+      {/* RESULTS */}
       {!loading && recommendations.length > 0 && (
         <div className="recommendation-list">
 
-          {recommendations.map((movie) => {
+          <h2>
+            Recommended Movies
+          </h2>
 
-            const genres = Array.isArray(movie.genres)
-              ? movie.genres
-              : typeof movie.genres === "string"
-                ? movie.genres.split("|")
-                : [];
+          {recommendations.map((movie, index) => (
 
-            return (
-              <div
-                className="movie-card"
-                key={movie.movie_id}
-              >
+            <div
+              className="movie-card"
+              key={movie.movie_id ?? index}
+            >
 
-                <h3>{movie.title}</h3>
-
-                {genres.length > 0 && (
-                  <div className="genres">
-                    {genres.map((genre) => (
-                      <span
-                        className="genre"
-                        key={genre}
-                      >
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {movie.predicted_rating !== undefined && (
-                  <p>
-                    Predicted Rating:{" "}
-                    <strong>
-                      {Number(movie.predicted_rating).toFixed(2)}
-                    </strong>
-                  </p>
-                )}
-
-                {movie.hybrid_score !== undefined && (
-                  <p>
-                    Hybrid Score:{" "}
-                    <strong>
-                      {Number(movie.hybrid_score).toFixed(3)}
-                    </strong>
-                  </p>
-                )}
-
+              <div>
+                <strong>
+                  #{index + 1}
+                </strong>
               </div>
-            );
-          })}
+
+              <h3>
+                {movie.title}
+              </h3>
+
+              {movie.predicted_rating !== undefined && (
+                <p>
+                  Predicted Rating:{" "}
+                  <strong>
+                    {Number(movie.predicted_rating).toFixed(2)}
+                  </strong>
+                </p>
+              )}
+
+              {movie.hybrid_score !== undefined && (
+                <p>
+                  Hybrid Score:{" "}
+                  <strong>
+                    {Number(movie.hybrid_score).toFixed(3)}
+                  </strong>
+                </p>
+              )}
+
+            </div>
+
+          ))}
 
         </div>
       )}
@@ -178,6 +182,7 @@ function Recommend({ userId = 1 }) {
             Enter a User ID and click Get Recommendations.
           </p>
         )}
+
     </div>
   );
 }
