@@ -1,38 +1,32 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 const API_URL = "https://movie-recommendation-system-4p8t.onrender.com";
 
-function Recommend({ userId = 1 }) {
-  const [uid, setUid] = useState(Number(userId));
+export default function Recommend() {
+  const [userId, setUserId] = useState("");
   const [n, setN] = useState(10);
   const [useHybrid, setUseHybrid] = useState(false);
 
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const loadRecommendations = async () => {
-    const user = Number(uid);
-    const count = Number(n);
+  async function loadRecommendations() {
+    const uid = parseInt(userId, 10);
 
-    if (!Number.isInteger(user) || user < 1 || user > 943) {
-      setError("User ID must be between 1 and 943.");
-      return;
-    }
-
-    if (!Number.isInteger(count) || count < 1 || count > 50) {
-      setError("Number of movies must be between 1 and 50.");
+    if (!uid || uid < 1 || uid > 943) {
+      setError("Please enter a valid User ID between 1 and 943.");
       return;
     }
 
     setLoading(true);
     setError("");
-    setRecommendations([]);
+    setRecommendations(null);
 
     try {
       const endpoint = useHybrid
-        ? `/hybrid/${user}?n=${count}`
-        : `/recommend/${user}?n=${count}`;
+        ? `/hybrid/${uid}?n=${n}`
+        : `/recommend/${uid}?n=${n}`;
 
       const response = await fetch(API_URL + endpoint);
 
@@ -49,230 +43,347 @@ function Recommend({ userId = 1 }) {
       setRecommendations(data.recommendations);
 
     } catch (err) {
-      console.error(err);
+      console.error("Recommendation error:", err);
       setError(err.message || "Failed to load recommendations.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="recommend-page">
 
-      {/* Header */}
+      {/* ================= HEADER ================= */}
+
       <div className="recommend-header">
+
         <div>
-          <h1>🎬 Movie Recommendations</h1>
+          <div className="recommend-eyebrow">
+            PERSONALIZED MOVIE DISCOVERY
+          </div>
+
+          <h1>
+            ✦ Recommendations
+          </h1>
+
           <p>
-            Personalized movie suggestions based on your preferences
+            Discover movies selected for you using machine learning
+            and movie genre preferences.
           </p>
         </div>
+
+        <div className="recommend-header-badge">
+          🎬 AI Powered
+        </div>
+
       </div>
 
-      {/* Controls */}
+
+      {/* ================= CONTROL PANEL ================= */}
+
       <div className="recommend-controls">
 
         <div className="control-group">
-          <label>User ID</label>
+
+          <label>
+            User ID
+          </label>
 
           <input
             type="number"
+            placeholder="1 – 943"
             min="1"
             max="943"
-            value={uid}
-            onChange={(e) => setUid(Number(e.target.value))}
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                loadRecommendations();
+              }
+            }}
           />
+
         </div>
 
+
         <div className="control-group">
-          <label>Number of Movies</label>
+
+          <label>
+            Results
+          </label>
 
           <select
             value={n}
             onChange={(e) => setN(Number(e.target.value))}
           >
-            <option value={5}>5 Movies</option>
-            <option value={10}>10 Movies</option>
-            <option value={15}>15 Movies</option>
-            <option value={20}>20 Movies</option>
+            <option value={5}>5 movies</option>
+            <option value={10}>10 movies</option>
+            <option value={15}>15 movies</option>
+            <option value={20}>20 movies</option>
           </select>
+
         </div>
 
+
         <label className="hybrid-option">
+
           <input
             type="checkbox"
             checked={useHybrid}
             onChange={(e) => setUseHybrid(e.target.checked)}
           />
 
-          <span>Use Hybrid Recommendation</span>
+          <span>
+            Use hybrid model
+          </span>
+
         </label>
+
 
         <button
           className="recommend-button"
-          type="button"
           onClick={loadRecommendations}
-          disabled={loading}
+          disabled={!userId || loading}
         >
-          {loading ? "⏳ Loading..." : "▶ Get Recommendations"}
+          {loading
+            ? "⏳ Finding movies..."
+            : "▶ Recommend Movies"}
         </button>
 
       </div>
 
-      {/* Error */}
+
+      {/* ================= ERROR ================= */}
+
       {error && (
         <div className="recommend-error">
           ⚠ {error}
         </div>
       )}
 
-      {/* Loading */}
+
+      {/* ================= LOADING ================= */}
+
       {loading && (
         <div className="recommend-loading">
-          <div className="loading-icon">🎬</div>
-          <p>Finding movies you may like...</p>
+
+          <div className="loading-icon">
+            🎬
+          </div>
+
+          <h3>
+            Finding movies for you...
+          </h3>
+
+          <p>
+            Our recommendation model is analyzing your preferences.
+          </p>
+
         </div>
       )}
 
-      {/* Results */}
-      {!loading && recommendations.length > 0 && (
-        <div className="results-section">
 
-          <div className="results-header">
-            <div>
-              <h2>Recommended for You</h2>
-              <p>
-                Top {recommendations.length} movie picks for User {uid}
-              </p>
+      {/* ================= RESULTS ================= */}
+
+      {!loading &&
+        recommendations &&
+        recommendations.length > 0 && (
+
+          <div className="results-section">
+
+            <div className="results-header">
+
+              <div>
+
+                <h2>
+                  Recommended for You
+                </h2>
+
+                <p>
+                  Top {recommendations.length} picks for User {userId}
+                </p>
+
+              </div>
+
+              <div className="result-count">
+                {recommendations.length} Movies
+              </div>
+
             </div>
 
-            <span className="result-count">
-              {recommendations.length} Movies
-            </span>
-          </div>
 
-          <div className="movie-grid">
+            <div className="movie-grid">
 
-            {recommendations.map((movie, index) => {
+              {recommendations.map((movie, index) => {
 
-              const genres = Array.isArray(movie.genres)
-                ? movie.genres
-                : typeof movie.genres === "string"
-                  ? movie.genres.split("|")
-                  : [];
+                const genres = Array.isArray(movie.genres)
+                  ? movie.genres
+                  : typeof movie.genres === "string"
+                    ? movie.genres.split("|")
+                    : [];
 
-              const rating =
-                movie.predicted_rating !== undefined
-                  ? Number(movie.predicted_rating)
-                  : null;
+                const rating =
+                  movie.predicted_rating !== undefined
+                    ? Number(movie.predicted_rating)
+                    : null;
 
-              const hybrid =
-                movie.hybrid_score !== undefined
-                  ? Number(movie.hybrid_score)
-                  : null;
+                const hybrid =
+                  movie.hybrid_score !== undefined
+                    ? Number(movie.hybrid_score)
+                    : null;
 
-              return (
-                <div
-                  className="real-movie-card"
-                  key={movie.movie_id ?? index}
-                >
+                const yearMatch =
+                  movie.title?.match(/\((\d{4})\)/);
 
-                  {/* Poster */}
-                  <div className="movie-poster">
+                const year =
+                  yearMatch ? yearMatch[1] : "";
 
-                    <div className="poster-rank">
-                      #{index + 1}
+                const cleanTitle =
+                  movie.title?.replace(/\s*\(\d{4}\)\s*$/, "");
+
+                return (
+
+                  <div
+                    className="real-movie-card"
+                    key={movie.movie_id ?? index}
+                  >
+
+                    {/* ================= POSTER ================= */}
+
+                    <div className="movie-poster">
+
+                      <div className="poster-rank">
+                        #{index + 1}
+                      </div>
+
+                      <div className="poster-icon">
+                        🎬
+                      </div>
+
+                      <div className="poster-title">
+                        {cleanTitle}
+                        {year && ` (${year})`}
+                      </div>
+
                     </div>
 
-                    <div className="poster-icon">
-                      🎬
-                    </div>
 
-                    <div className="poster-title">
-                      {movie.title}
-                    </div>
+                    {/* ================= DETAILS ================= */}
 
-                  </div>
+                    <div className="movie-details">
 
-                  {/* Movie Details */}
-                  <div className="movie-details">
+                      <h3>
+                        {cleanTitle}
+                      </h3>
 
-                    <h3>
-                      {movie.title}
-                    </h3>
+                      {year && (
+                        <div className="movie-year">
+                          {year}
+                        </div>
+                      )}
 
-                    {/* Genres */}
-                    {genres.length > 0 && (
-                      <div className="movie-genres">
 
-                        {genres.slice(0, 3).map((genre, i) => (
-                          <span
-                            key={`${genre}-${i}`}
-                            className="genre-pill"
-                          >
-                            {genre}
+                      {/* GENRES */}
+
+                      {genres.length > 0 && (
+
+                        <div className="movie-genres">
+
+                          {genres
+                            .filter(Boolean)
+                            .slice(0, 3)
+                            .map((genre, i) => (
+
+                              <span
+                                className="genre-pill"
+                                key={`${genre}-${i}`}
+                              >
+                                {genre}
+                              </span>
+
+                            ))}
+
+                        </div>
+
+                      )}
+
+
+                      {/* RATING */}
+
+                      {rating !== null && (
+
+                        <>
+
+                          <div className="rating-row">
+
+                            <span className="rating-label">
+                              ⭐ Predicted Rating
+                            </span>
+
+                            <strong>
+                              {rating.toFixed(2)}
+                            </strong>
+
+                          </div>
+
+
+                          <div className="rating-bar">
+
+                            <div
+                              className="rating-fill"
+                              style={{
+                                width: `${Math.min(
+                                  100,
+                                  (rating / 5) * 100
+                                )}%`
+                              }}
+                            />
+
+                          </div>
+
+                        </>
+
+                      )}
+
+
+                      {/* HYBRID */}
+
+                      {hybrid !== null && (
+
+                        <div className="hybrid-score">
+
+                          <span>
+                            AI Match Score
                           </span>
-                        ))}
 
-                      </div>
-                    )}
+                          <strong>
+                            {hybrid.toFixed(3)}
+                          </strong>
 
-                    {/* Rating */}
-                    {rating !== null && (
-                      <div className="rating-row">
+                        </div>
 
-                        <span className="rating-label">
-                          ⭐ Predicted Rating
-                        </span>
+                      )}
 
-                        <strong>
-                          {rating.toFixed(2)}
-                        </strong>
-
-                      </div>
-                    )}
-
-                    {/* Rating Bar */}
-                    {rating !== null && (
-                      <div className="rating-bar">
-
-                        <div
-                          className="rating-fill"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              (rating / 5) * 100
-                            )}%`
-                          }}
-                        />
-
-                      </div>
-                    )}
-
-                    {/* Hybrid */}
-                    {hybrid !== null && (
-                      <div className="hybrid-score">
-                        <span>Hybrid Score</span>
-
-                        <strong>
-                          {hybrid.toFixed(3)}
-                        </strong>
-                      </div>
-                    )}
+                    </div>
 
                   </div>
 
-                </div>
-              );
-            })}
+                );
+
+              })}
+
+            </div>
 
           </div>
-        </div>
-      )}
 
-      {/* Empty */}
+        )}
+
+
+      {/* ================= NO RESULTS ================= */}
+
       {!loading &&
         !error &&
+        recommendations &&
         recommendations.length === 0 && (
 
           <div className="recommend-empty">
@@ -281,19 +392,44 @@ function Recommend({ userId = 1 }) {
               🎬
             </div>
 
-            <h2>Discover Your Next Movie</h2>
+            <h2>
+              No Recommendations Found
+            </h2>
 
             <p>
-              Enter a User ID and click
-              <strong> Get Recommendations </strong>
-              to discover movies you may enjoy.
+              Try another User ID or increase the number of results.
             </p>
 
           </div>
+
+        )}
+
+
+      {/* ================= INITIAL STATE ================= */}
+
+      {!loading &&
+        !error &&
+        !recommendations && (
+
+          <div className="recommend-empty">
+
+            <div className="empty-movie-icon">
+              ✦
+            </div>
+
+            <h2>
+              Discover Your Next Favorite Movie
+            </h2>
+
+            <p>
+              Enter a User ID above and let the recommendation
+              system find movies you may enjoy.
+            </p>
+
+          </div>
+
         )}
 
     </div>
   );
 }
-
-export default Recommend;
