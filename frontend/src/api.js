@@ -1,5 +1,3 @@
-// api.js
-
 const BASE = "https://movie-recommendation-system-4p8t.onrender.com";
 
 async function request(path) {
@@ -29,5 +27,7 @@ export const api = {
     request(`/similar/${movieId}?n=${n}`),
 
   movies: (genre = "All", n = 20) =>
-    request(`/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`),
+    request(
+      `/movies?genre=${encodeURIComponent(genre || "All")}&n=${n}`
+    ),
 };

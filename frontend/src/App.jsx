@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getStats } from "./api";
+import { api } from "./api";
 
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -15,7 +15,7 @@ function App() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const data = await getStats();
+        const data = await api.stats();
         setStats(data);
       } catch (error) {
         console.error("Stats error:", error);
@@ -39,36 +39,18 @@ function App() {
       />
 
       <main className="main-content">
+        {activePage === "dashboard" && (
+          <Dashboard onRecommend={handleRecommend} />
+        )}
 
-  <header className="top-header">
-    <div>
-      <p className="eyebrow">MOVIE DISCOVERY</p>
+        {activePage === "recommend" && (
+          <Recommend userId={userId} />
+        )}
 
-      <h1>Find your next favorite movie</h1>
+        {activePage === "similar" && <Similar />}
 
-      <p className="header-subtitle">
-        Personalized recommendations powered by machine learning.
-      </p>
-    </div>
-
-    <div className="header-badge">
-      ● AI Recommendation Engine
-    </div>
-  </header>
-
-  {activePage === "dashboard" && (
-    <Dashboard onRecommend={handleRecommend} />
-  )}
-
-  {activePage === "recommend" && (
-    <Recommend userId={userId} />
-  )}
-
-  {activePage === "similar" && <Similar />}
-
-  {activePage === "browse" && <Browse />}
-
-</main>
+        {activePage === "browse" && <Browse />}
+      </main>
     </div>
   );
 }
